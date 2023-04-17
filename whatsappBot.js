@@ -48,15 +48,19 @@ const phoneNumberId = "112578155105976";
 let languageCode = "";
 
 const getListMessateInput = (recipient, links) => {
-  return JSON.stringify({
-    messaging_product: "whatsapp",
-    preview_url: true,
-    to: recipient,
-    type: "text",
-    text: {
-      body: links.toString(),
-    },
-  });
+  try {
+    return JSON.stringify({
+      messaging_product: "whatsapp",
+      preview_url: true,
+      to: recipient,
+      type: "text",
+      text: {
+        body: links.toString(),
+      },
+    });
+  } catch (error) {
+    console.log({ error });
+  }
 };
 
 const getTextMessageInput = async (recipient, text) => {

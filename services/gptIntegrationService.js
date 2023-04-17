@@ -12,9 +12,10 @@ const openai = new OpenAIApi(configuration);
 const gptIntegrationService = async (whatsappTextInput) => {
   console.log({ whatsappTextInput });
   reply = await openai.createCompletion({
-    model: "text-davinci-003",
+    model: "text-ada-001",
+    temperature: 0,
     prompt: whatsappTextInput,
-    max_tokens: 200,
+    max_tokens: 50,
   });
   let gptResponse = reply.data.choices[0].text;
   console.log(gptResponse);
