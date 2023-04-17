@@ -8,7 +8,6 @@ const checkFieldService = async (query, field) => {
   }
   else if(field == "youtube" || field == "Youtube" || field == "vidoes"){
     displayLinks = await getYoutubeLinks(field, query);
-
   }
   return displayLinks?.toString();
 };

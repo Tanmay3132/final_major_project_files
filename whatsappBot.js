@@ -6,6 +6,7 @@ const axios = require("axios").default;
 const Dialogflow = require("@google-cloud/dialogflow");
 const getGitHubLinks = require("./services/githubLinkService");
 const checkFieldService = require("./services/checkfeildService");
+const gptIntegrationService = require("./services/gptIntegrationService");
 
 require("dotenv").config();
 
@@ -41,7 +42,7 @@ async function _sendMessageToWhatsAppAsync(
   }
 }
 const token =
-  "EAANA7U3CJ1gBAFom5vqoHEJrmVoPZBMqU7PRnBttE7nf0oEBF1DQvjWX84UPidKUc0peEiXhlbMSsv1I8sZAiTqJd02KCyWnmPHrBsPt2u93b1hzZBLp1c7cRsW9RMkCYrzQKWD61TFCzTVZBIAF7l8wOiiMfK1YmkheEZACslHZAVknZCnhZAZCWhVkcqyYF3tzkvNTihMkZCMgZDZD";
+  "EAANA7U3CJ1gBACRI3f0HG7QGCYdJT8TU9eLZAj55d9FQOuUnK0bHVZCKRIkiIUCV3QOmRXVpnZBpNZBS4Xu2V4RPAmZCMqZBsHQAvxf5LZCGgEGsNKVZCqI8KvWMUmM0jjnsoSglmwXBL7qlljTjOsKpRpKj0luxilNFRbWAaQ1lRTkHztNbX3FfvZBwkQ6S2eH14SnmbHPx4uQZDZD";
 
 const phoneNumberId = "112578155105976";
 let languageCode = "";
@@ -59,6 +60,7 @@ const getListMessateInput = (recipient, links) => {
 };
 
 const getTextMessageInput = async (recipient, text) => {
+  console.log(text);
   return JSON.stringify({
     messaging_product: "whatsapp",
     preview_url: false,
@@ -71,6 +73,7 @@ const getTextMessageInput = async (recipient, text) => {
 };
 
 const sendMessage = async (data) => {
+  console.log("data to sent", { data });
   const phoneNumberId = "112578155105976";
   let languageCode = "";
 
@@ -139,7 +142,8 @@ whatsappController.post("/entrypoint", async (request, response, next) => {
   // let whatsAppBussinessJWT = "";
   try {
     const requestBody = request.body;
-    let whatsappReplyType = requestBody.entry[0].changes[0].value.messages[0].type.toLowerCase();
+    let whatsappReplyType =
+      requestBody.entry[0].changes[0].value.messages[0].type.toLowerCase();
 
     handleWhatsappTemplateForMessageType(whatsappReplyType, requestBody);
     response.json({ status: "ACK", userInput: null });
@@ -158,15 +162,6 @@ const handleWhatsappTemplateForMessageType = async (
   let result = {};
 
   switch (whatsappReplyType) {
-    case "interactive":
-      whatsappObj = requestBody.entry[0].changes[0].value;
-      msg =
-        requestBody.entry[0].changes[0].value.messages[0].interactive
-          .button_reply.title;
-      languageCode = await detectLanguage(msg);
-      result = await botFactory.getCurrentBot(msg, languageCode);
-      handleInteractiveReply(requestBody, whatsappObj, result);
-      break;
     case "text":
       whatsappObj = requestBody.entry[0].changes[0].value;
       msg = whatsappObj.messages[0].text.body;
@@ -188,14 +183,16 @@ const handleWhatsappTemplateForMessageType = async (
           dialogflowReponse.searchField
         );
 
-        messageToSent =  getListMessateInput(contactNumber, getData);
+        messageToSent = getListMessateInput(contactNumber, getData);
       } else {
-        messageToSent = await getTextMessageInput(
-          contactNumber,
-          dialogflowReponse.response
-        );
-      }
+        // messageToSent = await getTextMessageInput(
+        //   contactNumber,
+        //   dialogflowReponse.response
+        // );
+        const gptresponse = await gptIntegrationService(msg);
 
+        messageToSent = await getTextMessageInput(contactNumber, gptresponse);
+      }
       const sentMessage = await sendMessage(messageToSent);
       break;
     default:
