@@ -1,10 +1,10 @@
-const { default: axios } = require("axios");
+const axios = require("axios");
 
 const getGitHubLinks = async (field, queryData) => {
   try {
-    const response = await axios.get(
-      `http://127.0.0.1:5000/github`,{params: { query: queryData }}
-    );
+    const response = await axios.get(`http://127.0.0.1:5000/github`, {
+      params: { query: queryData },
+    });
     const listOfLinks = response?.data;
     let testLInks = [],
       checkLinks;
@@ -12,7 +12,7 @@ const getGitHubLinks = async (field, queryData) => {
       testLInks.push(items[0].toString() + "\n");
     }
     checkLinks = testLInks.toString().split(",").join(" ");
-    return checkLinks.toString();
+    return `Github Repositories For ${queryData} : \n` + checkLinks.toString();
   } catch (error) {
     console.log({ error });
   }

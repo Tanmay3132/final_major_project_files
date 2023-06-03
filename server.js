@@ -1,5 +1,4 @@
 const express = require("express");
-// const processQuery = require("./dialogflowLogic");
 const Dialogflow = require("@google-cloud/dialogflow");
 const app = express();
 app.use(express.json());
@@ -11,7 +10,6 @@ app.use(cors());
 const port = 5005;
 
 app.use("/", whatsappController);
-// app.use("/", dialogFlowController);
 
 app.get("/test", async (request, response) => {
   console.log("working...");
